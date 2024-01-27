@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="JsonEditor.zip">
+    <output-path>$PROJECT_DIR$/out/artifacts/JsonEditor_zip</output-path>
+    <root id="root">
+      <element id="archive" name="JsonEditor.zip">
+        <element id="directory" name="json">
+          <element id="file-copy" path="$PROJECT_DIR$/../SAPLearning/json/SAP.json" />
+        </element>
+        <element id="artifact" artifact-name="jsonEditor:jar" />
+      </element>
+    </root>
+  </artifact>
+</component>
