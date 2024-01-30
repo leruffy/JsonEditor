@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MainWindow extends JFrame{
 
@@ -50,7 +51,6 @@ public class MainWindow extends JFrame{
     private JButton nextButton;
     private JButton saveButton;
     private JButton suchenButton;
-    private JTextField fileField2;
     private JButton loadButton;
     private JLabel errorLabel2; // Für das Bearbeitungsfenster
     private JLabel questionNum;
@@ -58,9 +58,13 @@ public class MainWindow extends JFrame{
     private JButton zurueckZurAuswahlButton1;
     private JButton deleteButton;
     private JButton clearButton;
+    private JComboBox<String> comboBox1;
+    private JComboBox<String> comboBox2;
     private final ReadWriteJson json = new ReadWriteJson();
+    String dirPath = "./fragen/";
 
     public void launchGUI() {
+        scanDir();
         setContentPane(myPanel2);
         setTitle("JsonEditor");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -76,7 +80,8 @@ public class MainWindow extends JFrame{
         // Neue Frage hinzufügen
         saveButton1.addActionListener(e -> {
             QuestionsAnswersWrapper questionsAnswersWrapper = new QuestionsAnswersWrapper();
-            json.setFileName(getFilename(fileField1.getText()));
+            String file = (comboBox1.getSelectedIndex() != 0) ? Objects.requireNonNull(comboBox1.getSelectedItem()).toString() : fileField1.getText();
+            json.setFileName(getFilename(file));
             boolean doubleQuestion = false;
             JsonNode questionNode;
             int questionLen;
@@ -172,6 +177,10 @@ public class MainWindow extends JFrame{
                 }
             }
         });
+
+        comboBox1.addActionListener(e -> {
+            fileField1.setEnabled(comboBox1.getSelectedIndex() == 0);
+        });
         // Wechselt zum Hinzufügen Modus
         hinzufuegenButton.addActionListener(e -> {
             setContentPane(myPanel);
@@ -198,7 +207,7 @@ public class MainWindow extends JFrame{
         // Um beim Bearbeiten nach einer bestimmten Fragenummer zu suchen
         suchenButton.addActionListener(e -> {
             final int[] questionLen = {0};
-            json.setFileName(getFilename(fileField2.getText()));
+            json.setFileName(getFilename(Objects.requireNonNull(comboBox2.getSelectedItem()).toString()));
 
             try {
                 questionLen[0] = json.readObject("questions").size();
@@ -221,7 +230,7 @@ public class MainWindow extends JFrame{
         // Springt zur Nächsten Frage
         nextButton.addActionListener(e -> {
             final int[] questionLen = {0};
-            json.setFileName(getFilename(fileField2.getText()));
+            json.setFileName(getFilename(Objects.requireNonNull(comboBox2.getSelectedItem()).toString()));
             try {
                 questionLen[0] = json.readObject("questions").size();
             } catch (NullPointerException | IOException ignored) {}
@@ -252,7 +261,7 @@ public class MainWindow extends JFrame{
                 errorLabel2.setVisible(false);
                 QuestionsAnswersWrapper questionsAnswersWrapper = new QuestionsAnswersWrapper();
                 int idx = num[0];
-                json.setFileName(getFilename(fileField2.getText()));
+                json.setFileName(getFilename(Objects.requireNonNull(comboBox2.getSelectedItem()).toString()));
 
                 JsonNode questionNode;
                 try {
@@ -323,7 +332,7 @@ public class MainWindow extends JFrame{
                     solutionList.add(textField13.getText().replace('"', ' ').strip());
                 }
 
-                if (doubleQuestion || textField14.getText().strip().length() < 4 || answerList.size() < 1 || solutionList.size() < 1 || fileField2.getText().strip().length() < 2) {
+                if (doubleQuestion || textField14.getText().strip().length() < 4 || answerList.size() < 1 || solutionList.size() < 1) {
                     if (textField14.getText().strip().length() < 4) {
                         errorLabel2.setVisible(true);
                         errorLabel2.setText("Bitte eine Frage eingeben");
@@ -356,6 +365,10 @@ public class MainWindow extends JFrame{
         });
         // Hinzufüge modus
         zurueckZurAuswahlButton.addActionListener(e -> {
+            comboBox1.removeAllItems();
+            comboBox2.removeAllItems();
+            comboBox1.addItem("Neue Datei:");
+            scanDir();
             myPanel.setVisible(false);
             myPanel2.setVisible(true);
             myPanel3.setVisible(false);
@@ -363,6 +376,10 @@ public class MainWindow extends JFrame{
         });
         // Bearbeitungsmodus
         zurueckZurAuswahlButton1.addActionListener(e -> {
+            comboBox1.removeAllItems();
+            comboBox2.removeAllItems();
+            comboBox1.addItem("Neue Datei:");
+            scanDir();
             myPanel.setVisible(false);
             myPanel2.setVisible(true);
             myPanel3.setVisible(false);
@@ -372,7 +389,7 @@ public class MainWindow extends JFrame{
         deleteButton.addActionListener(e -> {
             if (fileLoaded[0]) {
                 int idx = num[0];
-                String file = fileField2.getText();
+                String file = Objects.requireNonNull(comboBox2.getSelectedItem()).toString();
                 json.setFileName(file);
                 // Zum erstellen leerer Json nodes
                 JsonNodeFactory factory = new JsonNodeFactory(false);
@@ -456,8 +473,21 @@ public class MainWindow extends JFrame{
         radioButton5.setSelected(false);
         radioButton6.setSelected(false);
     }
+
+    public void scanDir(){
+        File folder = new File(dirPath);
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles != null) {
+            for (File listOfFile : listOfFiles) {
+                if (listOfFile.isFile() && listOfFile.toString().endsWith(".json")) {
+                    comboBox1.addItem(listOfFile.getName());
+                    comboBox2.addItem(listOfFile.getName());
+                }
+            }
+        }
+    }
     public String getFilename(String file){
-        String dirPath = "./fragen/";
         if (file.strip().length() > 2) {
             if (!file.endsWith(".json")) {
                 file = dirPath + file.strip() + ".json";
@@ -474,8 +504,7 @@ public class MainWindow extends JFrame{
         try{
             errorLabel2.setVisible(false);
             errorLabel2.setText("");
-
-            json.setFileName(getFilename(fileField2.getText()));
+            json.setFileName(getFilename(Objects.requireNonNull(comboBox2.getSelectedItem()).toString()));
             questionNum.setVisible(true);
             questionNum.setText("Frage Nummer: "+n);
 
