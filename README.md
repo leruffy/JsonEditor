@@ -1,7 +1,7 @@
 # Json Editor
 
 # About
-- Dieser Editor ist zusätzlich zu dem Lernprogramm entstanden, um das Schreiben der Json Dateien
+- Dieser Editor ist zusätzlich zu dem [Lernprogramm](https://github.com/leruffy/Lernprogramm/) entstanden, um das Schreiben der Json Dateien
 zu erleichtern
 
 # Overview
